@@ -13,23 +13,23 @@ Functionality could be extended by plugins to for example provide project-specif
 sudo python2.7 setup.py install
 ```
 
-5. Now check list of detected text editors using: 
+- Now check list of detected text editors using: 
 ```bash
 php-browser-integration --dectect
 ```
 
-6. Set your editor, for phpStorm it would be for example:
+- Set your editor, for phpStorm it would be for example:
 ```bash
 php-browser-integration --text-editor phpStorm
 ```
 
-7. If your editor is not listed here, then set it manually, example:
+- If your editor is not listed here, then set it manually, example:
 ```bash
 # %line% parameter is optional, you don't have to enter this parameter
 php-browser-integration --config-set ide.openFileCommand "/usr/bin/YourTextEditor %path% %line%"
 ```
 
-8. Run application
+- Run application
 ```bash
 php-browser-integration
 
