@@ -28,3 +28,11 @@ php-browser-integration --text-editor phpStorm
 # %line% parameter is optional, you don't have to enter this parameter
 php-browser-integration --config-set ide.openFileCommand "/usr/bin/YourTextEditor %path% %line%"
 ```
+
+8. Run application
+```bash
+php-browser-integration
+
+# or in background
+php-browser-integration --daemonize
+```
