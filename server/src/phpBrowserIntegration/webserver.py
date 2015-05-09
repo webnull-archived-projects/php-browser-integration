@@ -30,7 +30,7 @@ class phpBrowserIntegrationHandler(tornado.web.RequestHandler):
         """
 
         if 'status' in responseArray and 'code' in responseArray and (responseArray['status'] == 'false' or responseArray['status'] == 'failed'):
-            self.kernel.logging.output('Invalid request, sent "' + responseArray['code'] + '" code to the browser', 'webserver')
+            self.kernel.logging.output('[' + self.request.remote_ip + '] Invalid request, sent "' + responseArray['code'] + '" code to the browser', 'webserver')
 
         self.write(json.dumps(responseArray))
 
@@ -59,17 +59,17 @@ class phpBrowserIntegrationHandler(tornado.web.RequestHandler):
         if not self.request.remote_ip in self.remoteHosts:
             self.kernel.logging.output('Client ' + self.request.remote_ip + ' was rejected due to unknown remote host', 'webserver')
 
-            self.write(json.dumps({
+            self.respond({
                 'status': 'false',
                 'code': 'not-authorized'
-            }))
+            })
             return
 
         if not path:
-            self.write(json.dumps({
+            self.respond({
                 'status': 'false',
                 'code': 'api-command-not-found'
-            }))
+            })
 
             return
 
@@ -79,18 +79,18 @@ class phpBrowserIntegrationHandler(tornado.web.RequestHandler):
             try:
                 return self.openProjectFile(base64.decodestring(exp[1]), exp[2])
             except binascii.Error:
-                self.write(json.dumps({
+                self.respond({
                     'status': 'false',
                     'message': 'Invalid base64 encoded data',
                     'code': 'invalid-data'
-                }))
+                })
 
                 return None
 
-        self.write(json.dumps({
+        self.respond({
             'status': 'false',
             'code': 'api-command-not-found'
-        }))
+        })
 
         return
 
@@ -113,21 +113,21 @@ class phpBrowserIntegrationHandler(tornado.web.RequestHandler):
             line = 0
 
         ## Restrict access only to project directories
-        baseDirs = [
-            '/var/www/raintpl/',
+        baseDirs = self.kernel.config.getKey('project.directories', [
+            '/var/www/',
             '/srv/http/'
-        ]
+        ])
 
         rPath = os.path.realpath(path)
         found = False
 
         ## Check if file exists
         if not os.path.isfile(rPath):
-            self.write(json.dumps({
+            self.respond({
                 'status': 'false',
                 'message': 'File not found',
                 'code': 'file-not-found'
-            }))
+            })
             return
 
         for baseDir in baseDirs:
@@ -136,11 +136,11 @@ class phpBrowserIntegrationHandler(tornado.web.RequestHandler):
 
         ## If file not found in base project directories
         if not found:
-            self.write(json.dumps({
+            self.respond({
                 'status': 'false',
                 'message': 'File not found',
                 'code': 'file-not-found'
-            }))
+            })
             return
 
         command = self.ideOpenFileCommand.replace('%path%', rPath).replace('%line%', str(int(line))) + ' & > /dev/null &2>/dev/null'
@@ -148,9 +148,9 @@ class phpBrowserIntegrationHandler(tornado.web.RequestHandler):
 
         subprocess.Popen([command], shell=True, stdin=None, stdout=None, stderr=None, close_fds=True)
 
-        self.write(json.dumps({
+        self.respond({
             'status': 'success'
-        }))
+        })
         return
 
 def run():
