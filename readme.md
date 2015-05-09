@@ -15,7 +15,7 @@ sudo python2.7 setup.py install
 
 - Now check list of detected text editors using: 
 ```bash
-php-browser-integration --dectect
+php-browser-integration --detect-editors
 ```
 
 - Set your editor, for phpStorm it would be for example:
