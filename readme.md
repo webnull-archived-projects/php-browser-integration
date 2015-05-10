@@ -3,6 +3,12 @@
 This is a small improvement written in Javascript and Python that allows clicking on filesystem paths in PHP and XDebug backtraces to open files in your favorite IDE.
 Functionality could be extended by plugins to for example provide project-specific features like translated string language code.
 
+## Requirements
+- Panthera-Desktop Framework (https://github.com/Panthera-Framework/Panthera-Desktop)
+- Tornado
+- Python 2.7
+- Linux / (propably) BSD
+
 ## Installation
 
 1. Install Greasemonkey or Tampermonkey in your web browser of choice
@@ -36,3 +42,5 @@ php-browser-integration
 # or in background
 php-browser-integration --daemonize
 ```
+
+- Open ~/.php-browser-integration/config.json with text editor and set your project directories in "project.directories"
