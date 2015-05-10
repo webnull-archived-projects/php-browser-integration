@@ -13,11 +13,19 @@ xdebugClickableLinks = function () {
     this.serverAddress = 'http://localhost:8161';
     this.linksStyle = 'text-decoration: none; color: black;';
     this.linksAttr = 'target="blank"';
+    this.authToken = 'type-your-auth-token-here';
 };
 
 xdebugClickableLinks.prototype.openLink = function(link) {
-    $.get(this.serverAddress + link, function(data, status){
-        console.log(data);
+    $.ajax({
+        url: this.serverAddress + link,
+        beforeSend: function (request)
+            {
+                request.setRequestHeader("Authority", authorizationToken);
+            },
+        success: function(data) {
+            console.log(data);
+        }
     });
 };
 

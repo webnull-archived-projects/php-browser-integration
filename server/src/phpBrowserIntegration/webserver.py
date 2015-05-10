@@ -30,10 +30,52 @@ class phpBrowserIntegrationHandler(tornado.web.RequestHandler):
         """
 
         if 'status' in responseArray and 'code' in responseArray and (responseArray['status'] == 'false' or responseArray['status'] == 'failed'):
-            self.kernel.logging.output('[' + self.request.remote_ip + '] Invalid request, sent "' + responseArray['code'] + '" code to the browser', 'webserver')
 
-        self.write(json.dumps(responseArray))
+            withMessage = ''
 
+            if 'message' in responseArray:
+                withMessage = ', with message "' + responseArray['message'] + '"'
+
+            self.kernel.logging.output('[' + self.request.remote_ip + '] Invalid request, sent "' + responseArray['code'] + '" code to the browser' + withMessage, 'webserver')
+
+        self.write(json.dumps(responseArray, sort_keys=True, indent=4, separators=(',', ': ')))
+
+    def validateClient(self):
+        """
+        Security related features
+        :return:
+        """
+
+        ## Validate client's IP address
+        if not self.request.remote_ip in self.remoteHosts:
+            self.kernel.logging.output('Client ' + self.request.remote_ip + ' was rejected due to unknown remote host', 'webserver')
+
+            self.respond({
+                'status': 'false',
+                'code': 'not-authorized'
+            })
+            return
+
+        token = None
+
+        ## Client token passed via X-Auth-Token header or a GET parameter - "token"
+        if self.request.headers.get('X-Auth-Token'):
+            token = self.request.headers.get('X-Auth-Token')
+        elif self.get_argument('token'):
+            token = self.get_argument('token')
+
+        ## Check if user has passed a valid authorization token/key
+        if self.kernel.config.getKey('security.tokens') and not str(token) in self.kernel.config.getKey('security.tokens'):
+            self.kernel.logging.output('Token "' + str(token) + '" not recognized', 'webserver')
+
+            self.respond({
+                'status': 'false',
+                'code': 'not-authorized',
+                'message': 'Token code not recognized'
+            })
+            return
+
+        return True
 
 
     def get(self, path = ''):
@@ -53,16 +95,10 @@ class phpBrowserIntegrationHandler(tornado.web.RequestHandler):
         ## Write required headers to browser
         self.writeHeaders()
 
-        self.kernel.logging.output('Client ' + self.request.remote_ip + ' connected', 'webserver')
+        self.kernel.logging.output('Client ' + self.request.remote_ip + ' connected and requested /' + str(path) + ' path', 'webserver')
 
         ## Validate user if its connecting from allowed remote/local host
-        if not self.request.remote_ip in self.remoteHosts:
-            self.kernel.logging.output('Client ' + self.request.remote_ip + ' was rejected due to unknown remote host', 'webserver')
-
-            self.respond({
-                'status': 'false',
-                'code': 'not-authorized'
-            })
+        if not self.validateClient():
             return
 
         if not path:
