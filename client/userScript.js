@@ -21,7 +21,7 @@ xdebugClickableLinks.prototype.openLink = function(link) {
         url: this.serverAddress + link,
         beforeSend: function (request)
             {
-                request.setRequestHeader("Authority", authorizationToken);
+                request.setRequestHeader("Authority", this.authToken);
             },
         success: function(data) {
             console.log(data);
